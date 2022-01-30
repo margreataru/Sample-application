@@ -27,7 +27,7 @@ for(var i=0; i<squares.length;i++){
     }
         else {
             this.style.background = "#232323";
-            try1.textContent = "Tappu ra babu..!"
+            try1.textContent = "Tappu ra babu...!"
 
         }
     });
