@@ -1,25 +1,49 @@
 pipeline {
+    environment {
+        registry = 'sreeharshav/devopsb17'
+        registryCredential = 'dockerhub_id'
+        dockerSwarmManager = '10.40.1.26:2375'
+        dockerhost = '10.40.1.26'
+        dockerImage = ''
+    }
     agent any
     stages {
-        stage('Build Application') {
+        stage('Cloning our Git') {
             steps {
-                sh 'mvn -f java-tomcat-sample/pom.xml clean package'
+                git 'https://github.com/mavrick202/dockertest1.git'
             }
-            post {
-                success {
-                    echo "Now Archiving the Artifacts...."
-                    archiveArtifacts artifacts: '**/*.war'
+        }
+        stage('Building our image') {
+            steps {
+                script {
+                    dockerImage = docker.build registry + ":v$BUILD_NUMBER"
                 }
             }
         }
-
-        stage('Create Tomcat Docker Image'){
+        stage('Push Image To DockerHUB') {
             steps {
-                sh "pwd"
-                sh "ls -a"
-                sh "docker build ./java-tomcat-sample-docker -t tomcatsamplewebapp:${env.BUILD_ID}"
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
+                    }
+                }
             }
         }
-
+        stage('Cleaning up') {
+            steps {
+                sh "docker rmi $registry:v$BUILD_NUMBER"
+            }
+        }
+        stage('Deploying to Docker Swarm') {
+            steps {
+                sh "docker -H tcp://$dockerSwarmManager service rm testing1 || true"
+                sh "docker -H tcp://$dockerSwarmManager service create --name testing1 -p 8100:80 $registry:v$BUILD_NUMBER"
+            }
+        }
+        stage('Verifying The Deployment') {
+            steps {
+                sh 'curl http://$dockerhost:8100 || exit 1'
+                }
+        }
     }
 }
