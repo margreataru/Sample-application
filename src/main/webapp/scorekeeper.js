@@ -19,7 +19,7 @@ for(var i=0; i<squares.length;i++){
         var clickedColor = this.style.background;
         if(clickedColor == pickedColor){
             console.log("RIGHT")
-            try1.textContent = "Correct"
+            try1.textContent = "Gelichinav po"
             for(var i=0; i<squares.length;i++){
                 squares[i].style.background = pickedColor;
         }
@@ -27,7 +27,7 @@ for(var i=0; i<squares.length;i++){
     }
         else {
             this.style.background = "#232323";
-            try1.textContent = "Worng.Try Again..!!"
+            try1.textContent = "Tappu ra babu..!"
 
         }
     });
